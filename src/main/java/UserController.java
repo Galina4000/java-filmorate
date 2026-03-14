@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> create(User user) {
+    public ResponseEntity<User> create(@Valid @RequestBody User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
@@ -33,7 +34,7 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<User> update(User user) {
+    public ResponseEntity<User> update(@Valid @RequestBody User user) {
         boolean found = false;
         for (int i = 0; i < users.size(); i++) {
             if (users.get(i).getId().equals(user.getId())) {
@@ -53,6 +54,8 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 }
+
+
 
 
 

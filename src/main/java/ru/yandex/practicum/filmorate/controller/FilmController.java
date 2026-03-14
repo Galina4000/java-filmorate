@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,10 @@ public class FilmController {
     }
 
     @PostMapping
-    public ResponseEntity<Film> create(Film film) {
+    public ResponseEntity<Film> create(@Valid @RequestBody Film film) {
+        if (film.getReleaseDate().isBefore(Film.FIRST_FILM_DATE)) {
+            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
+        }
         film.setId(idCounter++);
         films.add(film);
         log.info("Добавлен фильм: {}", film.getName());
@@ -30,10 +34,13 @@ public class FilmController {
     }
 
     @PutMapping
-    public ResponseEntity<Film> update(Film film) {
+    public ResponseEntity<Film> update(@Valid @RequestBody Film film) {
         boolean found = false;
         for (int i = 0; i < films.size(); i++) {
             if (films.get(i).getId().equals(film.getId())) {
+                if (film.getReleaseDate().isBefore(Film.FIRST_FILM_DATE)) {
+                    throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
+                }
                 films.set(i, film);
                 log.info("Обновлен фильм: {}", film.getName());
                 found = true;
@@ -47,6 +54,8 @@ public class FilmController {
         return ResponseEntity.ok(film);
     }
 }
+
+
 
 
 
