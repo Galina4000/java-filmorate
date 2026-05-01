@@ -54,8 +54,14 @@ public class UserService {
     }
 
     public void removeFriend(Long userId, Long friendId) {
-        userFriends.computeIfPresent(userId, (k, v) -> { v.remove(friendId); return v; });
-        userFriends.computeIfPresent(friendId, (k, v) -> { v.remove(userId); return v; });
+        userFriends.computeIfPresent(userId, (k, v) -> {
+            v.remove(friendId);
+            return v;
+        });
+        userFriends.computeIfPresent(friendId, (k, v) -> {
+            v.remove(userId);
+            return v;
+        });
     }
 
     public List<User> getFriends(Long userId) {
@@ -78,4 +84,5 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 }
+
 
