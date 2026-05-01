@@ -13,7 +13,7 @@ import java.util.Map;
 public class ErrorHandler {
 
     @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)  // ← 500 вместо 400
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleValidationException(final ValidationException e) {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", e.getMessage());
@@ -21,14 +21,23 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400 остается
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleMethodArgumentNotValidException(
             final MethodArgumentNotValidException e) {
         Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", e.getMessage());
+        errorResponse.put("error", e.getBindingResult().getFieldError().getDefaultMessage());
+        return errorResponse;
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleException(final Exception e) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Внутренняя ошибка сервера");
         return errorResponse;
     }
 }
+
 
 
 
