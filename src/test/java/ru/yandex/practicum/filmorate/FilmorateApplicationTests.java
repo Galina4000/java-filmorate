@@ -37,6 +37,7 @@ class FilmorateApplicationTests {
 
         assertEquals("test@test.ru", user.getEmail());
         assertEquals("validlogin", user.getLogin());
+
     }
 }
 
