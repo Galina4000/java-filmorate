@@ -19,6 +19,9 @@ public class FilmService {
     }
 
     public Film create(Film film) {
+        if (film == null) {
+            throw new ValidationException("Фильм не может быть null");
+        }
         if (film.getReleaseDate().isBefore(Film.FIRST_FILM_DATE)) {
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
@@ -26,6 +29,9 @@ public class FilmService {
     }
 
     public Film update(Film film) {
+        if (film == null) {
+            throw new ValidationException("Фильм не может быть null");
+        }
         if (film.getId() == null) {
             throw new ValidationException("Id фильма не задан");
         }
@@ -78,5 +84,6 @@ public class FilmService {
         likes.remove(userId);
     }
 }
+
 
 

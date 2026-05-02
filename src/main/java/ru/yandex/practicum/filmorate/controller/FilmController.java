@@ -4,8 +4,10 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
 
@@ -15,9 +17,11 @@ import java.util.List;
 public class FilmController {
 
     private final FilmService filmService;
+    private final UserService userService;
 
-    public FilmController(FilmService filmService) {
+    public FilmController(FilmService filmService, UserService userService) {
         this.filmService = filmService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -49,6 +53,9 @@ public class FilmController {
             @PathVariable Long id,
             @PathVariable Long userId
     ) {
+        // Эти проверки обеспечат 404 + {"error": ...}
+        filmService.findById(id);
+        userService.findById(userId);
         filmService.addLike(id, userId);
         return ResponseEntity.ok().build();
     }
@@ -58,6 +65,8 @@ public class FilmController {
             @PathVariable Long id,
             @PathVariable Long userId
     ) {
+        filmService.findById(id);
+        userService.findById(userId);
         filmService.removeLike(id, userId);
         return ResponseEntity.ok().build();
     }
@@ -67,6 +76,7 @@ public class FilmController {
         return filmService.getPopular(count);
     }
 }
+
 
 
 
