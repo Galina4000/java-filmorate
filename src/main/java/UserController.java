@@ -28,11 +28,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public User getById(@PathVariable Long id) {
-        User user = userService.findById(id);
-        if (user == null) {
-            throw new ValidationException("Пользователь не найден");
-        }
-        return user;
+        return userService.findById(id);
     }
 
     @PostMapping
@@ -80,3 +76,4 @@ public class UserController {
         return userService.getCommonFriends(id, otherId);
     }
 }
+

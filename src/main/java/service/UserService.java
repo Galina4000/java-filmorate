@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -25,9 +26,12 @@ public class UserService {
     }
 
     public User update(User user) {
+        if (user.getId() == null) {
+            throw new ValidationException("Id пользователя не задан");
+        }
         User existing = userStorage.findById(user.getId());
         if (existing == null) {
-            throw new ValidationException("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
@@ -36,7 +40,11 @@ public class UserService {
     }
 
     public User findById(Long id) {
-        return userStorage.findById(id);
+        User user = userStorage.findById(id);
+        if (user == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+        return user;
     }
 
     public List<User> findAll() {
@@ -47,13 +55,18 @@ public class UserService {
         User user = userStorage.findById(userId);
         User friend = userStorage.findById(friendId);
         if (user == null || friend == null) {
-            throw new ValidationException("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
         userFriends.computeIfAbsent(userId, k -> new HashSet<>()).add(friendId);
         userFriends.computeIfAbsent(friendId, k -> new HashSet<>()).add(userId);
     }
 
     public void removeFriend(Long userId, Long friendId) {
+        User user = userStorage.findById(userId);
+        User friend = userStorage.findById(friendId);
+        if (user == null || friend == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
         userFriends.computeIfPresent(userId, (k, v) -> {
             v.remove(friendId);
             return v;
@@ -65,6 +78,10 @@ public class UserService {
     }
 
     public List<User> getFriends(Long userId) {
+        User user = userStorage.findById(userId);
+        if (user == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
         Set<Long> friendIds = userFriends.getOrDefault(userId, Set.of());
         return friendIds.stream()
                 .map(userStorage::findById)
@@ -73,6 +90,11 @@ public class UserService {
     }
 
     public List<User> getCommonFriends(Long userId, Long otherId) {
+        User user = userStorage.findById(userId);
+        User other = userStorage.findById(otherId);
+        if (user == null || other == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
         Set<Long> userFriendsSet = userFriends.getOrDefault(userId, Set.of());
         Set<Long> otherFriendsSet = userFriends.getOrDefault(otherId, Set.of());
         Set<Long> common = userFriendsSet.stream()
@@ -84,5 +106,6 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 }
+
 
 

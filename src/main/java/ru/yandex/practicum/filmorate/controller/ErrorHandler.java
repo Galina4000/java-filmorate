@@ -29,6 +29,14 @@ public class ErrorHandler {
         return errorResponse;
     }
 
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleNotFoundException(final NotFoundException e) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", e.getMessage());
+        return errorResponse;
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, String> handleException(final Exception e) {
@@ -37,6 +45,7 @@ public class ErrorHandler {
         return errorResponse;
     }
 }
+
 
 
 

@@ -28,11 +28,7 @@ public class FilmController {
 
     @GetMapping("/{id}")
     public Film getById(@PathVariable Long id) {
-        Film film = filmService.findById(id);
-        if (film == null) {
-            throw new ValidationException("Фильм не найден");
-        }
-        return film;
+        return filmService.findById(id);
     }
 
     @PostMapping
@@ -72,6 +68,8 @@ public class FilmController {
         return filmService.getPopular(count);
     }
 }
+
+
 
 
 
