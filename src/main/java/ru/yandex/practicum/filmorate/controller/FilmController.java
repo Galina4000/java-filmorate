@@ -53,7 +53,7 @@ public class FilmController {
             @PathVariable Long id,
             @PathVariable Long userId
     ) {
-        // Эти проверки обеспечат 404 + {"error": ...}
+        // Эти две строки обеспечивают 404 при несуществующих id
         filmService.findById(id);
         userService.findById(userId);
         filmService.addLike(id, userId);
@@ -65,6 +65,7 @@ public class FilmController {
             @PathVariable Long id,
             @PathVariable Long userId
     ) {
+        // Эти две строки обеспечивают 404 при несуществующих id
         filmService.findById(id);
         userService.findById(userId);
         filmService.removeLike(id, userId);
@@ -76,6 +77,7 @@ public class FilmController {
         return filmService.getPopular(count);
     }
 }
+
 
 
 
