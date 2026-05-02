@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class InMemoryFilmStorage implements FilmStorage {
+public class InMemoryFilmStorage implements ru.yandex.practicum.filmorate.storage.film.FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
     private Long idCounter = 1L;
 

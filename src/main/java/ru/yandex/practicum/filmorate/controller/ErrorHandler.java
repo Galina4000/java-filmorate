@@ -12,9 +12,9 @@ import java.util.Map;
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler(ValidationException.class)
+    @ExceptionHandler(ru.yandex.practicum.filmorate.exception.ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidationException(final ValidationException e) {
+    public Map<String, String> handleValidationException(final ru.yandex.practicum.filmorate.exception.ValidationException e) {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", e.getMessage());
         return errorResponse;
@@ -29,9 +29,9 @@ public class ErrorHandler {
         return errorResponse;
     }
 
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler(ru.yandex.practicum.filmorate.exception.NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFoundException(final NotFoundException e) {
+    public Map<String, String> handleNotFoundException(final ru.yandex.practicum.filmorate.exception.NotFoundException e) {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", e.getMessage());
         return errorResponse;
