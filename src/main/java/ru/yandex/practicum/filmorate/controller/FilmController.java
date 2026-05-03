@@ -52,7 +52,6 @@ public class FilmController {
             @PathVariable Long id,
             @PathVariable Long userId
     ) {
-        // Всё проверки id ушли в FilmService
         filmService.addLike(id, userId);
         return ResponseEntity.ok().build();
     }
@@ -62,7 +61,6 @@ public class FilmController {
             @PathVariable Long id,
             @PathVariable Long userId
     ) {
-        // Всё проверки id ушли в FilmService
         filmService.removeLike(id, userId);
         return ResponseEntity.ok().build();
     }
@@ -72,6 +70,7 @@ public class FilmController {
         return filmService.getPopular(count);
     }
 }
+
 
 
 
