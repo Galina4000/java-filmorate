@@ -5,17 +5,21 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
+
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
     private final Map<Long, Set<Long>> filmLikes = new HashMap<>();
 
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
     }
 
     public Film create(Film film) {
@@ -73,17 +77,21 @@ public class FilmService {
         if (film == null) {
             throw new NotFoundException("Фильм не найден");
         }
+        userStorage.findById(userId);
         filmLikes.computeIfAbsent(filmId, k -> new HashSet<>()).add(userId);
     }
 
     public void removeLike(Long filmId, Long userId) {
-        if (!filmLikes.containsKey(filmId)) {
+        Film film = filmStorage.findById(filmId);
+        if (film == null) {
             throw new NotFoundException("Фильм не найден");
         }
-        Set<Long> likes = filmLikes.get(filmId);
+        userStorage.findById(userId);
+        Set<Long> likes = filmLikes.getOrDefault(filmId, new HashSet<>());
         likes.remove(userId);
     }
 }
+
 
 
 
