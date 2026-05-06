@@ -2,59 +2,80 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final List<User> users = new ArrayList<>();
-    private Long idCounter = 1L;
+
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public List<User> getAll() {
-        return users;
+        return userService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public User getById(@PathVariable Long id) {
+        return userService.findById(id);
     }
 
     @PostMapping
     public ResponseEntity<User> create(@Valid @RequestBody User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        user.setId(idCounter++);
-        users.add(user);
-        log.info("Добавлен пользователь: {}", user.getLogin());
-        return ResponseEntity.ok(user);
+        User created = userService.create(user);
+        log.info("Добавлен пользователь: {}", created.getLogin());
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping
     public ResponseEntity<User> update(@Valid @RequestBody User user) {
-        boolean found = false;
-        for (int i = 0; i < users.size(); i++) {
-            if (users.get(i).getId().equals(user.getId())) {
-                if (user.getName() == null || user.getName().isBlank()) {
-                    user.setName(user.getLogin());
-                }
-                users.set(i, user);
-                log.info("Обновлен пользователь: {}", user.getLogin());
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            log.warn("Пользователь с id={} не найден", user.getId());
-            throw new ValidationException("Пользователь не найден");
-        }
-        return ResponseEntity.ok(user);
+        User updated = userService.update(user);
+        log.info("Обновлен пользователь: {}", updated.getLogin());
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public ResponseEntity<Void> addFriend(
+            @PathVariable Long id,
+            @PathVariable Long friendId
+    ) {
+        userService.addFriend(id, friendId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public ResponseEntity<Void> removeFriend(
+            @PathVariable Long id,
+            @PathVariable Long friendId
+    ) {
+        userService.removeFriend(id, friendId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable Long id) {
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(
+            @PathVariable Long id,
+            @PathVariable Long otherId
+    ) {
+        return userService.getCommonFriends(id, otherId);
     }
 }
-
 
 
 

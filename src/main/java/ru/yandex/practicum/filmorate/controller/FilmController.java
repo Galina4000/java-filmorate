@@ -2,58 +2,85 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private final List<Film> films = new ArrayList<>();
-    private Long idCounter = 1L;
+
+    private final FilmService filmService;
+    private final UserService userService;
+
+    public FilmController(FilmService filmService, UserService userService) {
+        this.filmService = filmService;
+        this.userService = userService;
+    }
 
     @GetMapping
     public List<Film> getAll() {
-        return films;
+        return filmService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Film getById(@PathVariable Long id) {
+        return filmService.findById(id);
     }
 
     @PostMapping
     public ResponseEntity<Film> create(@Valid @RequestBody Film film) {
-        if (film.getReleaseDate().isBefore(Film.FIRST_FILM_DATE)) {
-            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
-        }
-        film.setId(idCounter++);
-        films.add(film);
-        log.info("Добавлен фильм: {}", film.getName());
-        return ResponseEntity.ok(film);
+        Film created = filmService.create(film);
+        log.info("Добавлен фильм: {}", created.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping
     public ResponseEntity<Film> update(@Valid @RequestBody Film film) {
-        boolean found = false;
-        for (int i = 0; i < films.size(); i++) {
-            if (films.get(i).getId().equals(film.getId())) {
-                if (film.getReleaseDate().isBefore(Film.FIRST_FILM_DATE)) {
-                    throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
-                }
-                films.set(i, film);
-                log.info("Обновлен фильм: {}", film.getName());
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            log.warn("Фильм с id={} не найден для обновления", film.getId());
-            throw new ValidationException("Фильм не найден");
-        }
-        return ResponseEntity.ok(film);
+        Film updated = filmService.update(film);
+        log.info("Обновлен фильм: {}", updated.getName());
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public ResponseEntity<Void> addLike(
+            @PathVariable Long id,
+            @PathVariable Long userId
+    ) {
+        filmService.addLike(id, userId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public ResponseEntity<Void> removeLike(
+            @PathVariable Long id,
+            @PathVariable Long userId
+    ) {
+        filmService.removeLike(id, userId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getPopular(@RequestParam(defaultValue = "10") int count) {
+        return filmService.getPopular(count);
     }
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
