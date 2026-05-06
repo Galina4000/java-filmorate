@@ -67,27 +67,28 @@ public class FilmService {
                 .sorted((a, b) -> {
                     long likesA = filmLikes.getOrDefault(a.getId(), Set.of()).size();
                     long likesB = filmLikes.getOrDefault(b.getId(), Set.of()).size();
-                    return Long.compare(likesB, likesA); // убывание
+                    return Long.compare(likesB, likesA); // Сортировка по убыванию лайков
                 })
                 .limit(safeCount)
                 .collect(Collectors.toList());
     }
 
     public void addLike(Long filmId, Long userId) {
-        Film film = filmStorage.findById(filmId);
-        userStorage.findById(userId);
+        Film film = filmStorage.findById(filmId);     // ← 404 если фильма нет
+        userStorage.findById(userId);                 // ← 404 если пользователя нет
         filmLikes.computeIfAbsent(filmId, k -> new HashSet<>()).add(userId);
     }
 
     public void removeLike(Long filmId, Long userId) {
-        Film film = filmStorage.findById(filmId);
-        userStorage.findById(userId);
+        Film film = filmStorage.findById(filmId);     // ← 404 если фильма нет
+        userStorage.findById(userId);                 // ← 404 если пользователя нет
         filmLikes.computeIfPresent(filmId, (k, v) -> {
             v.remove(userId);
-            return v.isEmpty() ? null : v; // убираем пустые записи
+            return v.isEmpty() ? null : v;            // Удаляем пустые записи
         });
     }
 }
+
 
 
 

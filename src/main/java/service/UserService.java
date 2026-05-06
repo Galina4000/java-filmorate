@@ -61,15 +61,15 @@ public class UserService {
         if (userId.equals(friendId)) {
             throw new ValidationException("Пользователь не может добавить сам себя в друзья");
         }
-        User user = userStorage.findById(userId);
-        User friend = userStorage.findById(friendId);
+        User user = userStorage.findById(userId);      // ← 404 если пользователя нет
+        User friend = userStorage.findById(friendId);  // ← 404 если друга нет
         userFriends.computeIfAbsent(userId, k -> new HashSet<>()).add(friendId);
         userFriends.computeIfAbsent(friendId, k -> new HashSet<>()).add(userId);
     }
 
     public void removeFriend(Long userId, Long friendId) {
-        User user = userStorage.findById(userId);
-        User friend = userStorage.findById(friendId);
+        User user = userStorage.findById(userId);      // ← 404 если пользователя нет
+        User friend = userStorage.findById(friendId);  // ← 404 если друга нет
         userFriends.computeIfPresent(userId, (k, v) -> {
             v.remove(friendId);
             return v.isEmpty() ? null : v;
@@ -81,7 +81,7 @@ public class UserService {
     }
 
     public List<User> getFriends(Long userId) {
-        User user = userStorage.findById(userId);
+        userStorage.findById(userId);                  // ← 404 если пользователя нет
         Set<Long> friendIds = userFriends.getOrDefault(userId, Set.of());
         return friendIds.stream()
                 .map(userStorage::findById)
@@ -90,8 +90,8 @@ public class UserService {
     }
 
     public List<User> getCommonFriends(Long userId, Long otherId) {
-        User user = userStorage.findById(userId);
-        User other = userStorage.findById(otherId);
+        userStorage.findById(userId);                  // ← 404 если user нет
+        userStorage.findById(otherId);                 // ← 404 если other нет
         Set<Long> userFriendsSet = userFriends.getOrDefault(userId, Set.of());
         Set<Long> otherFriendsSet = userFriends.getOrDefault(otherId, Set.of());
         Set<Long> common = userFriendsSet.stream()
@@ -103,6 +103,8 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 }
+
+
 
 
 
