@@ -25,7 +25,11 @@ public class ErrorHandler {
     public Map<String, String> handleMethodArgumentNotValidException(
             final MethodArgumentNotValidException e) {
         Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", e.getBindingResult().getFieldError().getDefaultMessage());
+        String message = e.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(fieldError -> fieldError.getDefaultMessage())
+                .orElse("Ошибка валидации");
+        errorResponse.put("error", message);
         return errorResponse;
     }
 
@@ -45,6 +49,7 @@ public class ErrorHandler {
         return errorResponse;
     }
 }
+
 
 
 

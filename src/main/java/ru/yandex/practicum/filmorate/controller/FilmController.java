@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -37,7 +38,7 @@ public class FilmController {
     public ResponseEntity<Film> create(@Valid @RequestBody Film film) {
         Film created = filmService.create(film);
         log.info("Добавлен фильм: {}", created.getName());
-        return ResponseEntity.ok(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping
@@ -53,7 +54,7 @@ public class FilmController {
             @PathVariable Long userId
     ) {
         filmService.addLike(id, userId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @DeleteMapping("/{id}/like/{userId}")
@@ -62,7 +63,7 @@ public class FilmController {
             @PathVariable Long userId
     ) {
         filmService.removeLike(id, userId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping("/popular")
@@ -70,6 +71,7 @@ public class FilmController {
         return filmService.getPopular(count);
     }
 }
+
 
 
 

@@ -26,7 +26,7 @@ public class FilmService {
         if (film == null) {
             throw new ValidationException("Фильм не может быть null");
         }
-        if (film.getReleaseDate().isBefore(Film.FIRST_FILM_DATE)) {
+        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(Film.FIRST_FILM_DATE)) {
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
         return filmStorage.create(film);
@@ -43,7 +43,7 @@ public class FilmService {
         if (existing == null) {
             throw new NotFoundException("Фильм не найден");
         }
-        if (film.getReleaseDate().isBefore(Film.FIRST_FILM_DATE)) {
+        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(Film.FIRST_FILM_DATE)) {
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
         return filmStorage.update(film);
@@ -64,33 +64,31 @@ public class FilmService {
     public List<Film> getPopular(int count) {
         int safeCount = Math.max(0, count);
         return filmStorage.findAll().stream()
-                .sorted((a, b) -> Long.compare(
-                        filmLikes.getOrDefault(b.getId(), Set.of()).size(),
-                        filmLikes.getOrDefault(a.getId(), Set.of()).size()
-                ))
+                .sorted((a, b) -> {
+                    long likesA = filmLikes.getOrDefault(a.getId(), Set.of()).size();
+                    long likesB = filmLikes.getOrDefault(b.getId(), Set.of()).size();
+                    return Long.compare(likesB, likesA); // убывание
+                })
                 .limit(safeCount)
                 .collect(Collectors.toList());
     }
 
     public void addLike(Long filmId, Long userId) {
         Film film = filmStorage.findById(filmId);
-        if (film == null) {
-            throw new NotFoundException("Фильм не найден");
-        }
         userStorage.findById(userId);
         filmLikes.computeIfAbsent(filmId, k -> new HashSet<>()).add(userId);
     }
 
     public void removeLike(Long filmId, Long userId) {
         Film film = filmStorage.findById(filmId);
-        if (film == null) {
-            throw new NotFoundException("Фильм не найден");
-        }
         userStorage.findById(userId);
-        Set<Long> likes = filmLikes.getOrDefault(filmId, new HashSet<>());
-        likes.remove(userId);
+        filmLikes.computeIfPresent(filmId, (k, v) -> {
+            v.remove(userId);
+            return v.isEmpty() ? null : v; // убираем пустые записи
+        });
     }
 }
+
 
 
 

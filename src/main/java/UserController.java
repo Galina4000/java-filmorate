@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
@@ -34,7 +35,7 @@ public class UserController {
     public ResponseEntity<User> create(@Valid @RequestBody User user) {
         User created = userService.create(user);
         log.info("Добавлен пользователь: {}", created.getLogin());
-        return ResponseEntity.ok(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping
@@ -50,7 +51,7 @@ public class UserController {
             @PathVariable Long friendId
     ) {
         userService.addFriend(id, friendId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
@@ -59,7 +60,7 @@ public class UserController {
             @PathVariable Long friendId
     ) {
         userService.removeFriend(id, friendId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping("/{id}/friends")
@@ -75,6 +76,7 @@ public class UserController {
         return userService.getCommonFriends(id, otherId);
     }
 }
+
 
 
 

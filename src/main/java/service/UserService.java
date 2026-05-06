@@ -19,6 +19,9 @@ public class UserService {
     }
 
     public User create(User user) {
+        if (user == null) {
+            throw new ValidationException("Пользователь не может быть null");
+        }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
@@ -26,6 +29,9 @@ public class UserService {
     }
 
     public User update(User user) {
+        if (user == null) {
+            throw new ValidationException("Пользователь не может быть null");
+        }
         if (user.getId() == null) {
             throw new ValidationException("Id пользователя не задан");
         }
@@ -52,11 +58,11 @@ public class UserService {
     }
 
     public void addFriend(Long userId, Long friendId) {
+        if (userId.equals(friendId)) {
+            throw new ValidationException("Пользователь не может добавить сам себя в друзья");
+        }
         User user = userStorage.findById(userId);
         User friend = userStorage.findById(friendId);
-        if (user == null || friend == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
         userFriends.computeIfAbsent(userId, k -> new HashSet<>()).add(friendId);
         userFriends.computeIfAbsent(friendId, k -> new HashSet<>()).add(userId);
     }
@@ -64,24 +70,18 @@ public class UserService {
     public void removeFriend(Long userId, Long friendId) {
         User user = userStorage.findById(userId);
         User friend = userStorage.findById(friendId);
-        if (user == null || friend == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
         userFriends.computeIfPresent(userId, (k, v) -> {
             v.remove(friendId);
-            return v;
+            return v.isEmpty() ? null : v;
         });
         userFriends.computeIfPresent(friendId, (k, v) -> {
             v.remove(userId);
-            return v;
+            return v.isEmpty() ? null : v;
         });
     }
 
     public List<User> getFriends(Long userId) {
         User user = userStorage.findById(userId);
-        if (user == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
         Set<Long> friendIds = userFriends.getOrDefault(userId, Set.of());
         return friendIds.stream()
                 .map(userStorage::findById)
@@ -92,9 +92,6 @@ public class UserService {
     public List<User> getCommonFriends(Long userId, Long otherId) {
         User user = userStorage.findById(userId);
         User other = userStorage.findById(otherId);
-        if (user == null || other == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
         Set<Long> userFriendsSet = userFriends.getOrDefault(userId, Set.of());
         Set<Long> otherFriendsSet = userFriends.getOrDefault(otherId, Set.of());
         Set<Long> common = userFriendsSet.stream()
@@ -106,6 +103,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 }
+
 
 
 
